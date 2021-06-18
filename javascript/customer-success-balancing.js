@@ -1,4 +1,80 @@
 /**
+ * Returns the array with the CS who aren't away, until the limit (maxCSAway)
+ * @param {array} customerSuccess
+ * @param {array} customerSuccessAway
+ */
+function removeCSAway(
+  customerSuccess, 
+  customerSuccessAway
+) {
+    let listCS = [];
+
+    let maxCSAway = Math.trunc(customerSuccess.length / 2);
+    let countAway = 0;
+
+    for (let customer of customerSuccess)
+    {
+      if ((customerSuccessAway.indexOf(customer.id) < 0) ||
+         (countAway == maxCSAway))
+      {
+        listCS.push({id: customer.id, score: customer.score});
+      } 
+      else
+      {
+        countAway++;
+      }
+    }
+
+    return listCS;
+}
+
+/**
+ * Returns the value that identify if the scores are same, greater or lower each other.
+ * @param {object} csA
+ * @param {object} csB
+ */
+function compareScore( 
+  csA, 
+  csB 
+) {
+    if ( csA.score < csB.score )
+    {
+      return -1;
+    }
+
+    if ( csA.score > csB.score )
+    {
+      return 1;
+    }
+
+    return 0;
+}
+
+/**
+ * Returns the number of CS's customers considering her score.
+ * @param {array} customers 
+ * @param {number} scoreMin 
+ * @param {number} scoreMax 
+ */
+function getNumberOfCustomers(
+  customers, 
+  scoreMin, 
+  scoreMax
+) {
+    let numberOfCustomer = 0;
+
+    for (let customer of customers)
+    {
+      if ((customer.score <= scoreMax) && (customer.score > scoreMin))
+      {
+        numberOfCustomer++;
+      } 
+    }
+
+    return numberOfCustomer;
+}
+
+/**
  * Returns the id of the CustomerSuccess with the most customers
  * @param {array} customerSuccess
  * @param {array} customers
@@ -9,11 +85,33 @@ function customerSuccessBalancing(
   customers,
   customerSuccessAway
 ) {
-  /**
-   * ===============================================
-   * =========== Write your solution here ==========
-   * ===============================================
-   */
+    let listCS = customerSuccessAway.length > 0 ? 
+                 removeCSAway(customerSuccess, customerSuccessAway) : 
+                 customerSuccess;
+
+    listCS = listCS.sort(compareScore);
+
+    let id = 0;
+    let max = 0;
+
+    for (let i = 0; i < listCS.length; i++)
+    {
+      let numberOfcustomers = i == 0 ? 
+                              getNumberOfCustomers(customers, 0, listCS[i].score) :
+                              getNumberOfCustomers(customers, listCS[i - 1].score, listCS[i].score);
+
+      if (numberOfcustomers > max)
+      {
+        max = numberOfcustomers;
+        id = listCS[i].id;
+      }
+      else if (numberOfcustomers == max)
+      {
+        id = 0;
+      }
+    }
+
+    return id;
 }
 
 test("Scenario 1", () => {
@@ -108,4 +206,25 @@ test("Scenario 7", () => {
   const csAway = [4, 5, 6];
 
   expect(customerSuccessBalancing(css, customers, csAway)).toEqual(3);
+});
+
+test("Scenario 8", () => {
+  const css = [
+    { id: 1, score: 60 },
+    { id: 2, score: 20 },
+    { id: 3, score: 95 },
+    { id: 4, score: 75 },
+    { id: 5, score: 55 }
+  ];
+  const customers = [
+    { id: 1, score: 90 },
+    { id: 2, score: 20 },
+    { id: 3, score: 70 },
+    { id: 4, score: 40 },
+    { id: 5, score: 60 },
+    { id: 6, score: 10 },
+  ];
+  const csAway = [2, 3, 4];
+
+  expect(customerSuccessBalancing(css, customers, csAway)).toEqual(5);
 });
