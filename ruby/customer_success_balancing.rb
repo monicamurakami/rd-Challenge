@@ -7,10 +7,50 @@ class CustomerSuccessBalancing
     @customer_success_away = customer_success_away
   end
 
+  def removeCSAway(arrCS, arrAway)
+    return arrCS if arrAway.empty?
+    listCS = []
+    maxCSAway = arrCS / 2
+    maxCSAway = maxCSAway.truncate()
+    countAway = 0
+    arrCS.each do |score, index|
+      if ((arrAway.include?(index) == false) or (countAway == maxCSAway)) 
+          listCS.push({ id: index, score: score })
+      else
+        countAway++
+    listCS
+  end
+
+  def getNumberOfCustomers(customers, scoreMin, scoreMax)
+    numberOfCustomer = 0
+    customers.each do |score|
+      if ((score <= scoreMax) and (score > scoreMin))
+        numberOfCustomer++
+    numberOfCustomer
+  end
+    
   # Returns the id of the CustomerSuccess with the most customers
   def execute
     # Write your solution here
-    nil
+    listCS = removeCSAway(customerSuccess, customerSuccessAway)
+    listCS.sort { |a,b| a.score <=> b.score }
+    id = 0
+    max = 0
+    numberOfcustomers = 0
+    listCS.each_with_index do |score, index| 
+      if index == 0
+        numberOfcustomers = getNumberOfCustomers(customers, 0, listCS[index].score)
+      else
+       numberOfCustomers = getNumberOfCustomers(customers, listCS[index - 1].score, listCS[i].score)
+      end
+  
+      if (numberOfcustomers > max)
+        max = numberOfcustomers
+        id = listCS[index].id
+      else if (numberOfcustomers == max)
+        id = 0
+      end
+     id
   end
 end
 
